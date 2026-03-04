@@ -1,0 +1,48 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build exe
+        run: pyinstaller build.spec
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/TodoMateWidget.exe
+          body: |
+            ## TodoMate Floating Widget
+
+            todomate.net을 Windows 플로팅 위젯으로 사용하세요.
+
+            ### 사용법
+            1. `TodoMateWidget.exe` 다운로드
+            2. 실행
+            3. todomate.net 로그인 (최초 1회)
+            4. 시스템 트레이에서 보이기/숨기기/종료 제어
+
+            ### 참고
+            - 로그인 세션은 앱 종료 후에도 유지됩니다.
+            - 상단 보라색 바를 드래그하여 위치를 이동하세요.
+            - WebView2 Runtime이 필요합니다 (Windows 10/11에 대부분 설치되어 있음).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
